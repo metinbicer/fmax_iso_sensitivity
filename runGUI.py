@@ -8,9 +8,9 @@ import os
 # main folder
 mainFold = 'C:/Users/metin/Desktop/PhD/MaxIso_ESB'
 # method (WeakHip, WeakKnee, WeakAnkle, WeakFull)
-method = 'WeakHip'
+resultsFolder = 'Results'
 # define the folder fullpath
-analysisFold = mainFold + '/' + method
+analysisFold = mainFold + '/' + resultsFolder
 # name of the folder that contains the gait trial
 trial = 'GC5_ss1'
 trialFold = analysisFold + '/' + trial
@@ -82,9 +82,15 @@ jrTool.setExternalLoadsFileName(externalLoadsFile)
 jrTool.setCoordinatesFileName(ikFile)
 jrTool.setLowpassCutoffFrequency(6)
 
+groupNames = {'WeakHip': ['hip'],
+              'WeakKnee': ['knee'],
+              'WeakAnkle': ['ankle'],
+              'WeakFull': ['hip', 'knee', 'ankle'],
+              'WeakFlexExt': ['flex', 'ext', 'ankle']
+              }
 
 for change in [10, 20, 30, 40, 0, -10, -20, -30, -40]:
-    for method in ['WeakHip','WeakKnee','WeakAnkle','WeakFull']:
+    for method, groups in groupNames.items():
         osimModel = modeling.Model(modelFile)
         osimModel.initSystem()
         if change == 0:
@@ -100,52 +106,16 @@ for change in [10, 20, 30, 40, 0, -10, -20, -30, -40]:
         muscleNames = []
         for i in range(rGroupNames.getSize()):
             gname = rGroupNames.get(i)
-            if method == 'WeakHip':
-                if 'hip' in gname.lower():
-                    muscleGroup = forceset.getGroup(gname)
-                    groupMembers = muscleGroup.getPropertyByIndex(0)
-                    groupMembersStr = groupMembers.toString()
-                    groupMembersStr = groupMembersStr.split()
-                    groupMembersStr[0] = groupMembersStr[0][1:]
-                    groupMembersStr[-1] = groupMembersStr[-1][:-1]
-                    for name in groupMembersStr:
-                        if name not in muscleNames:
-                            muscleNames.append(name)
-            if method == 'WeakKnee':
-                if 'knee' in gname.lower():
-                    muscleGroup = forceset.getGroup(gname)
-                    groupMembers = muscleGroup.getPropertyByIndex(0)
-                    groupMembersStr = groupMembers.toString()
-                    groupMembersStr = groupMembersStr.split()
-                    groupMembersStr[0] = groupMembersStr[0][1:]
-                    groupMembersStr[-1] = groupMembersStr[-1][:-1]
-                    for name in groupMembersStr:
-                        if name not in muscleNames:
-                            muscleNames.append(name)
-
-            if method == 'WeakAnkle':
-                if 'ankle' in gname.lower():
-                    muscleGroup = forceset.getGroup(gname)
-                    groupMembers = muscleGroup.getPropertyByIndex(0)
-                    groupMembersStr = groupMembers.toString()
-                    groupMembersStr = groupMembersStr.split()
-                    groupMembersStr[0] = groupMembersStr[0][1:]
-                    groupMembersStr[-1] = groupMembersStr[-1][:-1]
-                    for name in groupMembersStr:
-                        if name not in muscleNames:
-                            muscleNames.append(name)
-
-            if method == 'WeakFull':
-                if 'hip' in gname.lower() or 'knee' in gname.lower() or 'ankle' in gname.lower():
-                    muscleGroup = forceset.getGroup(gname)
-                    groupMembers = muscleGroup.getPropertyByIndex(0)
-                    groupMembersStr = groupMembers.toString()
-                    groupMembersStr = groupMembersStr.split()
-                    groupMembersStr[0] = groupMembersStr[0][1:]
-                    groupMembersStr[-1] = groupMembersStr[-1][:-1]
-                    for name in groupMembersStr:
-                        if name not in muscleNames:
-                            muscleNames.append(name)
+            if any(g in gname.lower() for g in groups):
+                muscleGroup = forceset.getGroup(gname)
+                groupMembers = muscleGroup.getPropertyByIndex(0)
+                groupMembersStr = groupMembers.toString()
+                groupMembersStr = groupMembersStr.split()
+                groupMembersStr[0] = groupMembersStr[0][1:]
+                groupMembersStr[-1] = groupMembersStr[-1][:-1]
+                for name in groupMembersStr:
+                    if name not in muscleNames:
+                        muscleNames.append(name)
 
         updMuscles = osimModel.updMuscles()
         newForces = []
