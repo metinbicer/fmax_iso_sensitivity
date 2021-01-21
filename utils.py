@@ -62,7 +62,11 @@ def stoToNumpy(file):
 # calculate the contact forces from the joint reaction analysis
 # jrfileContent is the dictionary containing jr analysis results
 # scaling is the scale parameter for the calculated total contact forces
-def totalReactionForces(files, scaling=1):
+def totalReactionForces(fold, scaling=1):
+    # jr results folder
+    jrResultsFold = fold+'\\JRResults'
+    # read the jr result files in the folder
+    files = [os.path.join(jrResultsFold, file) for file in os.listdir(jrResultsFold)]
     # a dict to save all reaction forces from the files
     reactionDict = dict()
     for file in files:
@@ -70,7 +74,7 @@ def totalReactionForces(files, scaling=1):
         fileName = os.path.split(file)[1]
         # check whether the simulation is valid (reserve actuator moments 
         # not exceeding 5% of the ID moments)
-        checkSimulation(fileName)
+        checkSimulation(fold, fileName)
         # forces of a file
         jrDict = stoToNumpy(file)
         for key, data in jrDict.items():
@@ -102,14 +106,14 @@ def Normalize2GC(data):
 
 # check whether the SO simulation is valid (compare the reserve forces between
 # id and so)
-def checkSimulation(jrFileName):
+def checkSimulation(fold, jrFileName):
     # get the name of the model and subject and the amount of reduction in max iso
     model, subj, reduction = analysisDetails(jrFileName)
     # so results are saved with this prefix
     analysis = model + '_' + subj + reduction
     soFileName = analysis + '_StaticOptimization_force.sto'
     # full path to the sofile
-    soFile = 'Results\\SOResults\\' + soFileName
+    soFile = fold + '\\SOResults\\' + soFileName
     # dict containing the so results
     soNumpy = stoToNumpy(soFile)
     # id results filename and dict containing the results

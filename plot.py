@@ -4,15 +4,12 @@ Created on Wed Jan 20 09:41:33 2021
 
 @author: metin
 """
-import os
 from utils import totalReactionForces, analysisDetails, createFigure
 
-# folder containing the joint reaction results
-fold = 'Results\\JRResults'
-# read the files in the folder
-files = [os.path.join(fold, file) for file in os.listdir(fold)]
+# folder containing the analysis
+fold = 'GC5_ss1'
 # joint reaction forces in a dict whose keys are the filenames (scaling=BW)
-reactions = totalReactionForces(files,scaling=75*9.81)
+reactions = totalReactionForces('Results\\'+fold, scaling=75*9.81)
 
 # axs cols (model names)
 cols = {'WeakHip': 0, # only the muscles crossing the hip joint are weakened

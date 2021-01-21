@@ -11,13 +11,15 @@ Created on Tue Jan  19 14:30:02 2020
 @author: metin
 """
 import os
+#########
 # main folder
 mainFold = 'C:/Users/metin/Desktop/PhD/MaxIso_ESB'
+# name of the folder that contains the gait trial
+trial = 'GC5_ss1'
+#########
 resultsFolder = 'Results'
 # define the folder fullpath
 analysisFold = mainFold + '/' + resultsFolder
-# name of the folder that contains the gait trial
-trial = 'GC5_ss1'
 trialFold = analysisFold + '/' + trial
 # id folder
 idFold = trialFold + '/4_Inverse_Dynamics'
@@ -46,9 +48,11 @@ soAnalysis = modeling.StaticOptimization()
 soAnalysis.setStartTime(grf.getFirstTime())
 soAnalysis.setEndTime(grf.getLastTime())
 # folders
-soResultFolder = analysisFold + '/SOResults'
-jrResultFolder = analysisFold + '/JRResults'
-
+soResultFolder = trialFold + '/SOResults'
+jrResultFolder = trialFold + '/JRResults'
+# create results folders
+os.mkdir(soResultFolder)
+os.mkdir(jrResultFolder)
 # create a soTool (this will be updated for each analysis)
 soTool = modeling.AnalyzeTool()
 soTool.getAnalysisSet().adoptAndAppend(soAnalysis)
