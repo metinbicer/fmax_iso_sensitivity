@@ -26,4 +26,4 @@ generateFigure(reactions, rows, cols,
 # cols is the same, define the rows (medial, lateral and total knee JRF)
 rows = ['lateral', 'medial', 'knee']
 generateFigure(reactions, rows, cols, 
-               ylabels=['Total Hip JRF [BW]', 'Total Knee JRF [BW]', 'Total Ankle JRF [BW]'])
+               ylabels=['Lateral Knee JRF [BW]', 'Medial Knee JRF [BW]', 'Total Knee JRF [BW]'])
