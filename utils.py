@@ -114,6 +114,11 @@ def Normalize2GC(data):
 # check whether the SO simulation is valid (compare the reserve forces between
 # id and so)
 def checkSimulation(fold, jrFileName):
+    printing = False
+    # initialize lists
+    soNames = []
+    idNames = []
+    percents = []
     # get the name of the model and subject and the amount of reduction in max iso
     model, subj, reduction = analysisDetails(jrFileName)
     # so results are saved with this prefix
@@ -130,7 +135,7 @@ def checkSimulation(fold, jrFileName):
     # check hip, knee and ankle reserve actuators
     joints = list(JR_LOADS.keys())
     for idMomentName, idMoment in idNumpy.items():
-        # if      is related to one of the joints
+        # if idMomentName is related to one of the joints
         if any(x in idMomentName for x in joints):
             # define the reserve actuator name in so results
             soKey = idMomentName[0:idMomentName.find('_moment')] + '_reserve'
@@ -144,8 +149,16 @@ def checkSimulation(fold, jrFileName):
                 percent = 100*np.abs(soForce)/maxID
             # if the percent difference exceeds 5%, report it
             if max(percent) > 5:
-                print(f'{model}, {subj} and {reduction} % reduction: \n',
-                      f'Invalid simulation reserve/maxID={max(percent)}')
+                printing = True
+                soNames.append(soKey)
+                idNames.append(idMomentName)
+                percents.append(max(percent))
+    # if there is an invalid simulation
+    if printing:
+        print(f'{model}, {subj} and {reduction} % change in max iso:')
+        for soname, idname, percent in zip(soNames, idNames, percents):
+              print(f'Invalid simulation {soname}/{idname}={percent}')
+        print('\n')    
 
 
 # splits the joint reaction result filename to get the name of the model, 
@@ -180,15 +193,17 @@ def createFigure(nrows, ncols, ylabels):
     fig, axs = plt.subplots(nrows, ncols, sharex=True, sharey=True)
     fig.patch.set_facecolor('white')
     # color cycle for consistent and smooth variation of colors on each axis
-    colorCycle = plt.cycler('color', [[0.96345811, 0.0442992 , 0., 1.],
+    colorCycle = plt.cycler('color', [[1., 0.17501816, 0., 1.],
+                                      [0.96345811, 0.0442992 , 0., 1.],
                                       [0.8030303, 0., 0., 1.],
                                       [0.6426025, 0., 0., 1.],
                                       [0.5, 0., 0., 1.],
-                                      [1., 0.30573711, 0., 1.],
                                       [1., 0.42193174, 0., 1.],
                                       [1., 0.55265069, 0., 1.],
                                       [1., 0.68336964, 0., 1.],
-                                      [1., 0.17501816, 0., 1.]])
+                                      [1., 0.8140886, 0., 1.],
+                                      [0.98355471, 0.94480755,0., 1.],
+                                      [1., 0.30573711, 0., 1.]])
     # set some properties of the axes
     for ax in axs.flatten():
         ax.set_prop_cycle(colorCycle)
@@ -221,10 +236,10 @@ def arrangeFigure():
     # order the handles accordingly
     handles = [labelDict[label] for label in labels]
     # set the figure legend
-    fig.legend(handles, labels, ncol=len(labels), loc='upper center', 
+    fig.legend(handles, labels, ncol=len(labels), loc='lower center',
                prop={'size': 12}, facecolor='white')
     # adjust the subplots
-    fig.subplots_adjust(top=0.92, bottom=0.07, wspace=0.2, hspace=0.2)
+    fig.subplots_adjust(top=0.95, bottom=0.1, wspace=0.2, hspace=0.2)
     
 
 def generateFigure(reactions, rows, cols, ylabels):

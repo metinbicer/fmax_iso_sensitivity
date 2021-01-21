@@ -51,8 +51,10 @@ soAnalysis.setEndTime(grf.getLastTime())
 soResultFolder = trialFold + '/SOResults'
 jrResultFolder = trialFold + '/JRResults'
 # create results folders
-os.mkdir(soResultFolder)
-os.mkdir(jrResultFolder)
+if not os.path.isdir(soResultFolder):
+    os.mkdir(soResultFolder)
+if not os.path.isdir(jrResultFolder):
+    os.mkdir(jrResultFolder)
 # create a soTool (this will be updated for each analysis)
 soTool = modeling.AnalyzeTool()
 soTool.getAnalysisSet().adoptAndAppend(soAnalysis)
@@ -102,7 +104,7 @@ groupNames = {'WeakHip': ['hip'],
               'WeakAnkle': ['ankle'],
               'WeakFull': ['hip', 'knee', 'ankle']}
 # % change in the reduction of the maximum isometric forces
-for change in [10, 20, 30, 40, 0, -10, -20, -30, -40]:
+for change in [10, 20, 30, 40, 60, 0, -10, -20, -30, -40, -60]:
     # for each model and its muscle groups
     for modelName, groups in groupNames.items():
         # load unmodified model
