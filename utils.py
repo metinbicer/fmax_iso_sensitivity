@@ -87,6 +87,13 @@ def totalReactionForces(fold, scaling=1):
             fz = jrDict[forces[2]]
             # the total joint reaction force of the joint
             jrDict[joint] = ((fx**2 + fy**2 + fz**2)**0.5)/scaling
+            # if the joint is knee, calculate the lateral and medial loads
+            if joint.lower() == 'knee':
+                tx = jrDict[forces[3]]
+                flateral = -0.997*fz + 0.506*(-fy) - 17.9*tx
+                fmedial = 0.997*fz+ 0.494*(-fy) + 17.9*tx
+                jrDict['lateral'] = np.where(flateral>0, flateral/scaling, 0)
+                jrDict['medial'] = np.where(fmedial>0, fmedial/scaling, 0)
         # save the reaction forces to the dict with the key being the filename
         reactionDict[fileName] = jrDict
     return reactionDict
@@ -168,7 +175,7 @@ def analysisDetails(jrFileName):
 
 # creates figure and returns the handles for the figure and the axes
 # to plot the total reaction forces on the hip, knee and ankle
-def createFigure(nrows, ncols):
+def createFigure(nrows, ncols, ylabels):
     # create figure and axes with the given number of rows and cols
     fig, axs = plt.subplots(nrows, ncols, sharex=True, sharey=True)
     fig.patch.set_facecolor('white')
@@ -189,10 +196,56 @@ def createFigure(nrows, ncols):
         ax.set_facecolor('white')
         ax.set_ylim([0, 6])
     # y labels
-    axs[0, 0].set_ylabel('Total Hip JRF [BW]')
-    axs[1, 0].set_ylabel('Total Knee JRF [BW]')
-    axs[2, 0].set_ylabel('Total Ankle JRF [BW]')
+    for r in range(nrows):
+        axs[r, 0].set_ylabel(ylabels[r])
     # x labels
     for ax in axs[-1,:]: ax.set_xlabel('% Gait Cycle')
 
     return fig, axs
+
+# get the current fig and ax
+# order labels depending on the max iso percent change
+# adjust the subplots
+def arrangeFigure():
+    # get current fig and ax
+    fig, ax = plt.gcf(), plt.gca()
+    # get the handles and labels
+    handles, labels = ax.get_legend_handles_labels()
+    # order the labels
+    labelDict = {}
+    for label, handle in zip(labels, handles):
+        labelDict[label] = handle
+    reductions = [int(l[:-1]) if not 'Nom' in l else 0 for l in labels]
+    reductions.sort(reverse=True)
+    labels = [["", "+"][r>0]+str(r)+'%' if r else 'Nominal' for r in reductions]
+    # order the handles accordingly
+    handles = [labelDict[label] for label in labels]
+    # set the figure legend
+    fig.legend(handles, labels, ncol=len(labels), loc='upper center', 
+               prop={'size': 12}, facecolor='white')
+    # adjust the subplots
+    fig.subplots_adjust(top=0.92, bottom=0.07, wspace=0.2, hspace=0.2)
+    
+
+def generateFigure(reactions, rows, cols, ylabels):
+    # create the figure template
+    fig, axs = createFigure(len(rows), len(cols.keys()), ylabels)
+    # for each jr file and its content
+    for file, jrf in reactions.items():
+        # get the name of the model and the reduction amount
+        model, _, reduction = analysisDetails(file)
+        # reduction is for the label
+        if not reduction:
+            # if there is no reduction, label='Nominal'
+            reduction = 'Nominal'
+        else:
+            reduction += '%'
+        # get the column of the axs for this model
+        axCol = axs[:, cols[model]]
+        # set its title
+        axCol[0].set_title(model)
+        # for each row of this column (plot each joint force)
+        for ax, row in zip(axCol, rows):
+            ax.plot(jrf[row.lower()], label=reduction)
+    # arrange figure, axs, labels, positions etc
+    arrangeFigure()
