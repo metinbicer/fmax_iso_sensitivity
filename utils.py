@@ -9,9 +9,11 @@ import numpy as np
 import os
 from scipy import interpolate
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+import copy
+import pandas as pd
+from scipy import signal
 plt.style.use('fivethirtyeight')
-num_plots = 30
-colormap = plt.cm.gist_ncar
 
 # jr loads
 JR_LOADS = {
@@ -74,7 +76,7 @@ def totalReactionForces(fold, scaling=1):
         fileName = os.path.split(file)[1]
         # check whether the simulation is valid (reserve actuator moments 
         # not exceeding 5% of the ID moments)
-        checkSimulation(fold, fileName)
+        _ = checkSimulation(fold, fileName)
         # forces of a file
         jrDict = stoToNumpy(file)
         for key, data in jrDict.items():
@@ -129,7 +131,7 @@ def checkSimulation(fold, jrFileName):
     # dict containing the so results
     soNumpy = stoToNumpy(soFile)
     # id results filename and dict containing the results
-    idFile = 'Results\\' + subj + '\\' + '4_Inverse_Dynamics\\Results\\id_GenForces.sto'
+    idFile = fold + '\\4_Inverse_Dynamics\\Results\\id_GenForces.sto'
     idNumpy = stoToNumpy(idFile)
 
     # check hip, knee and ankle reserve actuators
@@ -155,10 +157,13 @@ def checkSimulation(fold, jrFileName):
                 percents.append(max(percent))
     # if there is an invalid simulation
     if printing:
-        print(f'{model}, {subj} and {reduction} % change in max iso:')
+        print('{}, {} and {} % change in max iso:'.format(model, subj, reduction))
         for soname, idname, percent in zip(soNames, idNames, percents):
-              print(f'Invalid simulation {soname}/{idname}={percent}')
-        print('\n')    
+              print('Invalid simulation {}/{}={}'.format(soname, idname, percent))
+        print('\n')
+        return False
+    else:
+        return True
 
 
 # splits the joint reaction result filename to get the name of the model, 
@@ -190,23 +195,10 @@ def analysisDetails(jrFileName):
 # to plot the total reaction forces on the hip, knee and ankle
 def createFigure(nrows, ncols, ylabels):
     # create figure and axes with the given number of rows and cols
-    fig, axs = plt.subplots(nrows, ncols, sharex=True, sharey=True)
+    fig, axs = plt.subplots(nrows, ncols, sharex=True, sharey=False)
     fig.patch.set_facecolor('white')
-    # color cycle for consistent and smooth variation of colors on each axis
-    colorCycle = plt.cycler('color', [[1., 0.17501816, 0., 1.],
-                                      [0.96345811, 0.0442992 , 0., 1.],
-                                      [0.8030303, 0., 0., 1.],
-                                      [0.6426025, 0., 0., 1.],
-                                      [0.5, 0., 0., 1.],
-                                      [1., 0.42193174, 0., 1.],
-                                      [1., 0.55265069, 0., 1.],
-                                      [1., 0.68336964, 0., 1.],
-                                      [1., 0.8140886, 0., 1.],
-                                      [0.98355471, 0.94480755,0., 1.],
-                                      [1., 0.30573711, 0., 1.]])
     # set some properties of the axes
     for ax in axs.flatten():
-        ax.set_prop_cycle(colorCycle)
         ax.set_xlim([0, 100])
         ax.set_facecolor('white')
         ax.set_ylim([0, 6])
@@ -231,36 +223,64 @@ def arrangeFigure():
     for label, handle in zip(labels, handles):
         labelDict[label] = handle
     reductions = [int(l[:-1]) if not 'Nom' in l else 0 for l in labels]
-    reductions.sort(reverse=True)
+    reductions.sort(reverse=False)
     labels = [["", "+"][r>0]+str(r)+'%' if r else 'Nominal' for r in reductions]
     # order the handles accordingly
     handles = [labelDict[label] for label in labels]
     # set the figure legend
-    fig.legend(handles, labels, ncol=len(labels), loc='lower center',
-               prop={'size': 12}, facecolor='white')
+    # copy the handles
+    handles = [copy.copy(ha) for ha in handles]
+    # set the linewidths to the copies
+    [ha.set_linewidth(7) for ha in handles ]
+    #fig.legend(handles, labels, ncol=len(labels), loc='lower center',
+    #           prop={'size': 15}, facecolor='white', edgecolor='white')
     # adjust the subplots
-    fig.subplots_adjust(top=0.95, bottom=0.1, wspace=0.2, hspace=0.2)
+    fig.subplots_adjust(top=0.95, bottom=0.15, wspace=0.2, hspace=0.2)
     
 
 def generateFigure(reactions, rows, cols, ylabels):
     # create the figure template
     fig, axs = createFigure(len(rows), len(cols.keys()), ylabels)
+    n_lines = int((len(reactions.keys()) - len(cols.keys()))/len(cols.keys()))
     # for each jr file and its content
     for file, jrf in reactions.items():
         # get the name of the model and the reduction amount
         model, _, reduction = analysisDetails(file)
-        # reduction is for the label
-        if not reduction:
-            # if there is no reduction, label='Nominal'
-            reduction = 'Nominal'
-        else:
-            reduction += '%'
+        reduction, cmap, r, lw, ls = getPlotProps(reduction, n_lines)
         # get the column of the axs for this model
         axCol = axs[:, cols[model]]
         # set its title
         axCol[0].set_title(model)
         # for each row of this column (plot each joint force)
         for ax, row in zip(axCol, rows):
-            ax.plot(jrf[row.lower()], label=reduction)
+            ax.plot(jrf[row.lower()], label=reduction, c=cmap.to_rgba(r),
+                    linewidth=lw, linestyle=ls)
     # arrange figure, axs, labels, positions etc
     arrangeFigure()
+    return fig, axs
+
+
+def getPlotProps(reduction, n_lines):
+    r = int(reduction) if reduction else 0
+    lw = 1
+    ls = '-'
+    if r == 0:
+        cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=1, vmax=n_lines),
+                                     cmap=mpl.cm.Greys_r)
+        lw = 2
+        ls = '-.'
+    elif r > 0:
+        cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=1, vmax=n_lines),
+                                     cmap=mpl.cm.Reds)
+        r = (abs(r)+30)/10
+    else:
+        cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=1, vmax=n_lines),
+                                     cmap=mpl.cm.Blues)
+        r = (abs(r)+30)/10
+    # reduction is for the label
+    if not reduction:
+        # if there is no reduction, label='Nominal'
+        reduction = 'Nominal'
+    else:
+        reduction += '%'
+    return reduction, cmap, r, lw, ls
