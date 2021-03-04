@@ -1,13 +1,6 @@
 __pycache__
 #folders
 /Results/*
-!/Results/GC5_ss1/
-/Results/GC5_ss1/*
-!/Results/GC5_ss1/1_Data/
-!/Results/GC5_ss1/2_Scaling/
-/Results/GC5_ss1/2_Scaling/Geometry/
-!/Results/GC5_ss1/3_Inverse_Kinematics/
-!/Results/GC5_ss1/4_Inverse_Dynamics/
 
 # opensim logs
 *.log
