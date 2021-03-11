@@ -14,7 +14,7 @@ FORCE_LABELS = ['hip', 'ankle', 'knee', 'lateral', 'medial']
 
 def compare(reactions, expReactions=None, 
             trials=['GC5_ss1', 'GC5_ss8', 'GC5_ss9', 'GC5_ss11'],
-            jointModelNames=['WeakHip', 'WeakKnee', 'WeakAnkle', 'WeakFull'],
+            jointModelNames=['Hip', 'Knee', 'Ankle', 'Full'],
             changeAmounts=[-40, -30, -20, -10, 0, 10, 20, 30, 40],
             forces=['hip', 'knee', 'ankle'], tWindow=[40, 60]):
     '''
@@ -47,7 +47,7 @@ def compare(reactions, expReactions=None,
     else:
         diff = 'in-vivo' # string to be printed if expReactions!=None
 
-    # each model (e.g. jointModel='WeakHip')
+    # each model (e.g. jointModel='Hip' --> Fisos of muscles crossing the hip are changed)
     for jointModel in jointModelNames:
         # for this model, instantiate a dict (to store each force) for each metric
         for metricName, met in fullMetrics.items():
@@ -72,7 +72,7 @@ def compare(reactions, expReactions=None,
         # mean and std of each metric
         for jointModel in jointModelNames:
             for change in changeAmounts:
-                text += '{} {}:\t'.format(change, jointModel)
+                text += '{:3} {}:\t'.format(change, jointModel)
                 for force in forces:
                     metricTrials = np.array(metric[jointModel][change][force])
                     text += '\t{:.2f}\t{:.2f}\t|\t'.format(np.mean(metricTrials),
@@ -146,8 +146,8 @@ def getPeakError(modified, nominal, forces=FORCE_LABELS, tWindow=[40, 60]):
     peakVal = dict() # peak value difference
     peakPercent = dict() # percent peak difference
     for force in forces:
-        m1 = np.max(np.abs(modified[force])) # peak value-1 (modified)
-        m2 = np.max(np.abs(nominal[force])) # peak value-2 (nominal)
+        m1 = np.max(np.abs(modified[force][tWindow[0]:tWindow[1]])) # peak value-1 (modified)
+        m2 = np.max(np.abs(nominal[force][tWindow[0]:tWindow[1]])) # peak value-2 (nominal)
         peakVal[force] = m1-m2 # positive if increase 
         peakPercent[force] = 100*(m1-m2)/m2 # wrt nominal
     return peakVal, peakPercent

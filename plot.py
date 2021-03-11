@@ -13,10 +13,10 @@ import os
 
 # defaults
 # axs cols (model names)
-JOINT_MODEL_NAMES = ['WeakHip',   # only the Fiso of muscles crossing the hip joint are changed
-                   'WeakKnee',  # only the Fiso of muscles crossing the knee joint are changed
-                   'WeakAnkle', # only the Fiso of muscles crossing the ankle joint are changed
-                   'WeakFull',  # all muscles' Fiso are changed
+JOINT_MODEL_NAMES = ['Hip',   # only the Fiso of muscles crossing the hip joint are changed
+                     'Knee',  # only the Fiso of muscles crossing the knee joint are changed
+                     'Ankle', # only the Fiso of muscles crossing the ankle joint are changed
+                     'Full',  # all muscles' Fiso are changed
                     ]
 # axs rows (joints)
 JOINTS = ['Hip', 'Knee', 'Ankle']

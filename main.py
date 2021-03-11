@@ -16,12 +16,12 @@ BW = 75*9.81
 modelFileName = 'Rajagopal2015-scaled.osim'
 # model names given to the modified models depending on the joint whose
 # strength has changed
-jointModelNames = ['WeakHip', 'WeakKnee', 'WeakAnkle', 'WeakFull']
+jointModelNames = ['Hip', 'Knee', 'Ankle', 'Full']
 # each model has changes in different joint strength
-groupNames = {jointModelNames[0]: ['hip'], 
-              jointModelNames[1]: ['knee'], 
-              jointModelNames[2]: ['ankle'],
-              jointModelNames[3]: ['hip', 'knee', 'ankle']}
+groupNames = {jointModelNames[0]: ['hip_l'],
+              jointModelNames[1]: ['walker_knee_l'],
+              jointModelNames[2]: ['ankle_l'],
+              jointModelNames[3]: ['hip_l', 'walker_knee_l', 'ankle_l']}
 # with the percentages
 # 0 is for the nominal model for each joint-model
 changeAmounts = [-40, -30, -20, -10, 0, 10, 20, 30, 40]
