@@ -56,6 +56,8 @@ def runAnalysis(modelFileName='Rajagopal2015-scaled.osim',
         # get the ExternalLoads object to write the exact path of the grfFile
         extLoads = osim.ExternalLoads(osimModel, xmlFold + 'ExternalLoads.xml')
         extLoads.setDataFileName(grfFile)
+        extLoads.setExternalLoadsModelKinematicsFileName(ikFile)
+        extLoads.setLowpassCutoffFrequencyForLoadKinematics(6)
         externalLoadsFile = 'ExternalLoads.xml'
         # print the external loads under trialFold
         extLoads.printToXML(externalLoadsFile)
@@ -97,7 +99,7 @@ def runAnalysis(modelFileName='Rajagopal2015-scaled.osim',
         soTool.setCoordinatesFileName(ikFile)
         soTool.setLowpassCutoffFrequency(6)
         soTool.setResultsDir(soResultFolder)
-        
+        soTool.setOutputPrecision(15)
         # create a jr analysis (this will be updated for each analysis)
         jrAnalysis = osim.JointReaction()
         jrAnalysis.setName('JR')
@@ -106,15 +108,11 @@ def runAnalysis(modelFileName='Rajagopal2015-scaled.osim',
         # joint reactions to be calculated for jointNames exerted on
         # onBodies and expressed in inFrame
         jointNames = osim.ArrayStr()
+        jointNames.append('all')
         onBodies = osim.ArrayStr()
+        onBodies.append('child')
         inFrame = osim.ArrayStr()
-        jrJointNames = ['hip_r', 'walker_knee_r', 'ankle_r', 'hip_l', 'walker_knee_l', 'ankle_l']
-        jrOnBodies = ['child', 'child', 'child', 'child', 'child', 'child']
-        jrInFrame = jrOnBodies
-        for joint, body, frame in zip(jrJointNames, jrOnBodies, jrInFrame):
-            jointNames.append(joint)
-            onBodies.append(body)
-            inFrame.append(frame)
+        inFrame.append('child')
         jrAnalysis.setOnBody(onBodies)
         jrAnalysis.setInFrame(inFrame)
         jrAnalysis.setJointNames(jointNames)
@@ -128,7 +126,8 @@ def runAnalysis(modelFileName='Rajagopal2015-scaled.osim',
         jrTool.setLowpassCutoffFrequency(6)
         # set the analysis
         jrTool.getAnalysisSet().adoptAndAppend(jrAnalysis)
-
+        jrTool.setOutputPrecision(15)
+        jrTool.setForceSetFiles(forcesetFileStr)
         for newModelFile, newModelPath in zip(modelFileNames, modelPaths):
             osimModel = osim.Model(newModelPath)
             toolNames = osimModel.getName() + '_' + trial
