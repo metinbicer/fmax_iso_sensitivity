@@ -18,20 +18,20 @@ def compare(reactions, expReactions=None,
             changeAmounts=[-40, -30, -20, -10, 0, 10, 20, 30, 40],
             forces=['hip', 'knee', 'ankle'], tWindow=[40, 60]):
     '''
-    compare the model JRFs to
-        nominal model JRFs if expReactions==None
+    compare the model JRFs, muscle forces or activations to
+        those of nominal model if expReactions==None
     OR 
-        in-vivo JRFs if expReactions!=None
+        those in-vivo if expReactions!=None
     
     Parameters
     ----------
-    reactions       : JRFS are stored in a dict whose keys are the trials
-    expReactions    : in-vivo JRFs
+    reactions       : forces (or activations) are stored in a dict whose keys are the trials
+    expReactions    : in-vivo
     trials          : trial names 
     jointModelNames : names of the models (keys of groupNames)
     changeAmounts   : amount of percent changes to be applied on the jointModel strengths
-    forces          : JRF names
-    tWindow         : time window of % gait cycle for comparing JRFs (peak deviations)
+    forces          : force names
+    tWindow         : time window of % gait cycle for comparison (peak deviations)
     '''
     # dict contains different metrics 
     fullMetrics = {'rmse': {},
@@ -64,38 +64,39 @@ def compare(reactions, expReactions=None,
     # print a table for each metric
     for metricName, metric in fullMetrics.items():
         text = '\t\t\t\t{} (Differences from the {} across trials)\n'.format(metricName, diff)
-        text += '\t\t\t{} (mean-std)\t\t\t'.format(forces[0])
+        text += '\t\t{:3} (mean-std)\t'.format(forces[0])
         if len(forces)>1:
             for force in forces[1:]:
-                text += '{} (mean-std)\t\t\t'.format(force)
+                text += '{:3} (mean-std)\t'.format(force)
         text += '\n'
         # mean and std of each metric
         for jointModel in jointModelNames:
             for change in changeAmounts:
-                text += '{:3} {}:\t'.format(change, jointModel)
+                text += '{:3} {:3}:\t'.format(change, jointModel)
                 for force in forces:
                     metricTrials = np.array(metric[jointModel][change][force])
-                    text += '\t{:.2f}\t{:.2f}\t|\t'.format(np.mean(metricTrials),
-                                                           np.std(metricTrials))
+                    text += '{:.2f}\t{:.2f}\t|\t'.format(np.mean(metricTrials),
+                                                         np.std(metricTrials))
                 text += '\n'
         print(text)
-
+    # return the metrics
+    return fullMetrics
 
 def getMetrics(reactions, expReactions=None,
                jointModel='knee', forces=FORCE_LABELS, tWindow=[40, 60]):
     '''
-    creates a dict containing the metrics to compare the model JRFs to
-        nominal model JRFs if expReactions==None
+    creates a dict containing the metrics to compare the model results to
+        nominal model results if expReactions==None
     OR 
-        in-vivo JRFs if expReactions!=None
+        in-vivo if expReactions!=None
     
     Parameters
     ----------
-    reactions       : model JRFS
-    expReactions    : in-vivo JRFs
+    reactions       : model forces (or activations)
+    expReactions    : in-vivo
     jointModel      : name of the joints whose strength has changed
     forces          : jointModel reaction forces
-    tWindow         : time window of % gait cycle for comparing JRFs (peak deviations)
+    tWindow         : time window of % gait cycle for comparison (peak deviations)
     
     Return
     ----------
@@ -107,16 +108,16 @@ def getMetrics(reactions, expReactions=None,
         modelName, subj, red = analysisDetails(file)
         if jointModel.lower() in modelName.lower():
             if not red:
-                # nominal model JRFs
+                # nominal model results
                 model[0] = aResult
             else:
                 model[int(red)] = aResult
     od = collections.OrderedDict(sorted(model.items()))
     if expReactions == None:
-        # if model comparison, nominal is the nominal model JRFs
+        # if model comparison, nominal is the nominal model results
         nominal = od[0]
     else:
-        # if in-vivo comparison, nominal is the experimental JRFs
+        # if in-vivo comparison, nominal is the experimental
         nominal = expReactions
     metrics = {}
     for red, modified in od.items():

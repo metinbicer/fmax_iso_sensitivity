@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 plt.style.use('fivethirtyeight')
 import copy
 import os
+import numpy as np
 
 # defaults
 # axs cols (model names)
@@ -18,12 +19,23 @@ JOINT_MODEL_NAMES = ['Hip',   # only the Fiso of muscles crossing the hip joint 
                      'Ankle', # only the Fiso of muscles crossing the ankle joint are changed
                      'Full',  # all muscles' Fiso are changed
                     ]
-# axs rows (joints)
-JOINTS = ['Hip', 'Knee', 'Ankle']
+# axs rows (JRFs)
+FORCES = ['hip', 'knee', 'ankle']
+
+# labels for muscles
+MUSCLE_LABELS = {'recfem_l': 'Rectus Femoris',
+                 'iliacus_l': 'Iliacus',
+                 'psoas_l': 'Psoas',
+                 'bfsh_l': 'Biceps Femoris Short Head',
+                 'gaslat_l': 'Gastrocnemius Lateralis',
+                 'gasmed_l': 'Gastrocnemius Medialis',
+                 'soleus_l': 'Soleus'}
+
 
 
 def plotTrial(reactions, expReactions, trial='GC5_ss1',
-              jointModelNames=JOINT_MODEL_NAMES, joints=JOINTS):
+              jointModelNames=JOINT_MODEL_NAMES, forces=FORCES,
+              ylim=[0,6], compare='JRF', save=False):
     '''
     plots model and in-vivo JRFs for a trial
 
@@ -37,20 +49,46 @@ def plotTrial(reactions, expReactions, trial='GC5_ss1',
         trial name
     jointModelNames: list
         axs cols (model names)
-    joints: list
+    forces: list
         axs rows (force headers in reactions[trial])
     '''
     # cols and rows
     cols = {model:i for i, model in enumerate(jointModelNames)}
-    rows = joints
+    rows = forces
     # joint reaction forces in a dict whose keys are the the trials
     trialReactions = reactions[trial]
-    trialExpReactions = expReactions[trial]
+    if expReactions is not None:
+        trialExpReactions = expReactions[trial]
+    else:
+        trialExpReactions = {None:None}
+    # y-labels (forces)
+    ylabels = []
+    # if joint reaction forces are plotted
+    if compare == 'JRF':
+        unit = 'JRF [BW]'
+    # if so muscle forces
+    elif compare == 'SO':
+        unit = '[BW]'
+    # if activations
+    elif compare == 'ACT':
+        unit = ''
+    # ylabel = ylabel + unit
+    for ylabel in rows:
+        if compare == 'SO' or compare == 'ACT':
+            try:
+                ylabel = MUSCLE_LABELS[ylabel]
+            except:
+                pass
+            ylabel = ylabel.replace(' ', '\n')
+        ylabels.append(' '.join([ylabel, unit]))
+    # figure saving name
+    if save:
+        saveName = compare
+    else:
+        saveName = None
     # generate the figure
-    generateFigure(trialReactions, trialExpReactions, trial, rows, cols,
-                   ylabels=['{} JRF [BW]'.format(rows[0]),
-                            '{} JRF [BW]'.format(rows[1]),
-                            '{} JRF [BW]'.format(rows[2])])
+    generateFigure(trialReactions, trialExpReactions, trial,
+                   rows, cols, ylabels, ylim, saveName)
 
 
 # save the figure with given figname and format in a fold
@@ -66,18 +104,28 @@ def saveCurrrentFig(fig=None, fold='', figname='', format='png'):
 
 # creates figure and returns the handles for the figure and the axes
 # to plot the total reaction forces on the hip, knee and ankle
-def createFigure(nrows, ncols, ylabels):
+def createFigure(nrows, ncols, ylabels, ylim):
     # create figure and axes with the given number of rows and cols
-    fig, axs = plt.subplots(nrows, ncols, sharex=True, sharey=False, figsize=(16, 9))
+    fig, axs = plt.subplots(nrows, ncols, sharex=True, sharey=True, figsize=(16, 9))
+    if ncols == 1 or nrows == 1:
+        axs = axs.reshape(nrows, ncols)
     fig.patch.set_facecolor('white')
     # set some properties of the axes
+    ticks = np.linspace(round(ylim[0]), round(ylim[1]), round(ylim[1])+1).tolist()
+    if ylim[1]-ticks[-1] >= 0.05:
+        ticks = ticks[:-1] + [ylim[1]]
     for ax in axs.flatten():
         ax.set_xlim([0, 100])
         ax.set_facecolor('white')
-        ax.set_ylim([0, 6])
+        ax.set_ylim(ylim)
+        ax.set_yticks(ticks)
     # y labels
     for r in range(nrows):
-        axs[r, 0].set_ylabel(ylabels[r])
+        if any(force in ylabels[r] for force in FORCES):
+            font = 'large'
+        else:
+            font = 'small'
+        axs[r, 0].set_ylabel(ylabels[r], fontsize=font)
     # x labels
     for ax in axs[-1,:]: ax.set_xlabel('% Gait Cycle')
 
@@ -108,37 +156,38 @@ def arrangeFigure():
     fig.legend(handles, labels, ncol=len(labels), loc='lower center',
                prop={'size': 15}, facecolor='white', edgecolor='white')
     # adjust the subplots
-    fig.subplots_adjust(top=0.95, bottom=0.15, wspace=0.2, hspace=0.2)
+    fig.subplots_adjust(top=0.95, bottom=0.15, wspace=0.15, hspace=0.3)
 
 
 # generate figure for the given trial JRFs
 # saves a png image of the figure
-def generateFigure(trialReactions, trialExpReactions, trial, rows, cols, ylabels):
+def generateFigure(trialReactions, trialExpReactions, trial, rows, cols, ylabels, ylim, saveName):
     # create the figure template
-    fig, axs = createFigure(len(rows), len(cols.keys()), ylabels)
+    fig, axs = createFigure(len(rows), len(cols.keys()), ylabels, ylim)
     n_lines = int((len(trialReactions.keys()) - len(cols.keys()))/len(cols.keys()))
     # for each jr file and its content
     for file, jrf in trialReactions.items():
         # get the name of the model and the change amount
         model, _, change = analysisDetails(file)
         change, cmap, r, lw, ls = getPlotProps(change, n_lines)
-        # get the column of the axs for this model
-        axCol = axs[:, cols[model]]
-        # set its title
-        axCol[0].set_title(model)
-        # for each row of this column (plot each joint force)
-        for ax, row in zip(axCol, rows):
-            ax.plot(jrf[row.lower()], label=change, c=cmap.to_rgba(r),
-                    linewidth=lw, linestyle=ls)
-    for ax in axs[1,:]:
-        ax.plot(trialExpReactions['knee'], linewidth=3, linestyle='-',
-                color='Green',label='Experimental')
+        if model in cols.keys():
+            # get the column of the axs for this model
+            axCol = axs[:, cols[model]]
+            # set its title
+            axCol[0].set_title(model)
+            # for each row of this column (plot each joint force)
+            for ax, row in zip(axCol, rows):
+                ax.plot(jrf[row], label=change, c=cmap.to_rgba(r),
+                        linewidth=lw, linestyle=ls)
+                if row in list(trialExpReactions.keys()):
+                    ax.plot(trialExpReactions[row], linewidth=3, linestyle='-',
+                            color='Green',label='Experimental')
     # add suptitle (trial name)
     fig.suptitle(trial)
     # arrange figure, axs, labels, positions etc
     arrangeFigure()
     # save the figure
-    saveCurrrentFig(fig=fig, figname=trial, fold='Figures')
+    if saveName: saveCurrrentFig(fig=fig, figname=trial+'_'+saveName, fold='Figures')
     # show the figure
     plt.show()
     return fig, axs
