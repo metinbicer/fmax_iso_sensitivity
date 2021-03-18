@@ -11,6 +11,9 @@ plt.style.use('fivethirtyeight')
 import copy
 import os
 import numpy as np
+from compareResults import compare
+from fractions import gcd
+
 
 # defaults
 # axs cols (model names)
@@ -31,6 +34,92 @@ MUSCLE_LABELS = {'recfem_l': 'Rectus Femoris',
                  'gasmed_l': 'Gastrocnemius Medialis',
                  'soleus_l': 'Soleus'}
 
+
+def meanPeakDeviationPlot(reactions,
+                          trials=['GC5_ss1', 'GC5_ss8', 'GC5_ss9', 'GC5_ss11'],
+                          jointModelNames=['Hip', 'Knee', 'Ankle', 'Full'],
+                          changeAmounts=[-40, -30, -20, -10, 0, 10, 20, 30, 40],
+                          forces=['hip', 'knee', 'ankle'], tWindow=[40, 60],
+                          ylim=[0,6], save=False):
+    '''
+    plots a chart, showing only mean changes from the nominal model results (stds can be
+    added later)
+
+    Parameters
+    ----------
+    reactions: dict
+        contains a key (trial) and corresponding model forces or acts
+    trial: list
+        trial names
+    jointModelNames: list
+        axs cols (model names)
+    changeAmounts: list
+        amount of percent changes to be applied on the jointModel strengths
+    forces: list
+        axs rows (force headers in reactions[trial])
+    tWindow: list
+        time window of % gait cycle for comparison (peak deviations)
+
+    Return
+    ----------
+    metrics:        :
+    '''
+    # calculate all metrics (prints the table as well)
+    fullMetrics = compare(reactions, None, trials, jointModelNames,
+                          changeAmounts, forces, tWindow)
+    # peakVal
+    metric = fullMetrics['PeakVal']
+    # remove 0 from the changeAmounts (no need to plot)
+    changeAmounts.remove(0)
+    # create the figure template
+    ncols = len(jointModelNames)
+    fig, axs = plt.subplots(1, ncols, sharex=True, sharey=True, figsize=(16, 6))
+    axs = axs.flatten()
+    axs = axs.reshape(1, ncols)
+    fig.patch.set_facecolor('white')
+    for ax in axs.flatten():
+        ax.set_aspect(1)
+        ax.set_ylim(ylim)
+        gc = gcd(100*abs(ylim[0]), 100*abs(ylim[1]))
+        ax.set_yticks(np.arange(ylim[0], ylim[1]+0.01, gc/100))
+        ax.set_facecolor('white')
+    # y labels
+    axs[0, 0].set_ylabel('$\Delta$ Activation', fontsize='large')
+
+    # color cycle
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    for axRowID, force in enumerate(forces):
+        # for each model type
+        for axColID, jointModel in enumerate(jointModelNames):
+            axs[0, axColID].set_title(jointModel)
+            ax = axs[0, axColID]
+            barValues_mean = []
+            barValues_std = []
+            # get each metric
+            for change in changeAmounts:
+                metricTrials = np.array(metric[jointModel][change][force])
+                # mean and std of the trilas
+                barValues_mean.append(np.mean(metricTrials))
+                barValues_std.append(np.std(metricTrials))
+            x_pos = np.linspace(ylim[0], ylim[1], len(changeAmounts))
+            try:
+                Flabel = MUSCLE_LABELS[force]
+            except:
+                Flabel = force
+            ax.errorbar(x_pos, barValues_mean,
+                        color=colors[axRowID], label=Flabel)
+            ax.axhline(y=0, color='black', ls='-', lw=0.5)
+            ax.set_xticks(x_pos)
+            ax.set_xticklabels(changeAmounts, rotation=45)
+            ax.yaxis.grid(True)
+            ax.xaxis.grid(False)
+    fig.text(0.5, 0.15, '% $F_{iso}$ Variation', ha='center', fontsize=15)
+    # get the handles and labels
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, ncol=len(labels), loc='lower center',
+               prop={'size': 15}, facecolor='white', edgecolor='white')
+    if save: saveCurrrentFig(fig, figname='barChart', fold='Figures')
+    plt.show()
 
 
 def plotTrial(reactions, expReactions, trial='GC5_ss1',
