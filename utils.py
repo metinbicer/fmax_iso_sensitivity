@@ -48,7 +48,7 @@ def loadExpJRF(scaling=1):
     except:
         print('Exp JRFs are not saved')
     # read the structured mat to dicts
-    expReactions = {} # its keys are the trial names in the mat file
+    expJRF = {} # its keys are the trial names in the mat file
     eTibia_data = mat['eTibia_data'] # eTibia_data structure of the mat file
     # for each experiment (e.g. 'GC5'
     for expNo in list(eTibia_data.dtype.names):
@@ -66,58 +66,87 @@ def loadExpJRF(scaling=1):
             # exp and trial name (e.g. 'GC5_ss1')
             expTrial = expNo + '_' + trial
             # each trial of an experiment is a dict containing the JRFs
-            expReactions[expTrial] = {}
+            expJRF[expTrial] = {}
             for idx_col, colName in enumerate(colheaders):
                 colName = colName[0]
-                expReactions[expTrial][forceNames[colName]] = data[:, idx_col, idx_trial]/scaling
-    return expReactions
+                expJRF[expTrial][forceNames[colName]] = data[:, idx_col, idx_trial]/scaling
+    return expJRF
 
 
 # loads model JRFs from the saved file
-def loadModelJRF():
+# params:
+#    saveFile : the name given to the files containing the JRF, SO and ACT
+# returns:
+#   dicts containing JRF, SO and ACT
+def loadModelJRF(loadFile='model'):
     try:
-        with open('modelJRF.p', 'rb') as fp:
-            reactions = pickle.load(fp)
-            return reactions
+        with open(loadFile + 'JRF.p', 'rb') as fp:
+            JRF = pickle.load(fp)
+        with open(loadFile + 'SO.p', 'rb') as fp:
+            SO = pickle.load(fp)
+        with open(loadFile + 'ACT.p', 'rb') as fp:
+            ACT = pickle.load(fp)
+            return JRF, SO, ACT
     except:
         print('JRFs are not saved')
 
 
-# reads JRF of all valid analysis and saves them
-# returns reactions (dict containing trial names as keys, and the values are the all valid analysis)
+# reads JRF, SO and ACT of all valid analysis and saves them
+# returns JRF, SO and ACT (dict containing trial names as keys, and the values are the all valid analysis)
 # params:
-#   trials: list of string (results should be written using folders with the same name as trials)
-#   scaling: the parameter to scale the calculated total reaction forces
-def saveModelJRF(trials=['GC5_ss1', 'GC5_ss3', 'GC5_ss8', 'GC5_ss9', 'GC5_ss11'], BW=75*9.81):
-    # all reactions are stored in a dict whose keys are the folder names (trials)
-    reactions = {}
+#   trials   : list of string (results should be written using folders with the same name as trials)
+#   scaling  : the parameter to scale the calculated total reaction forces
+#   saveFile : the name given to the files containing the JRF, SO and ACT
+def saveModelJRF(trials=['GC5_ss1', 'GC5_ss3', 'GC5_ss8', 'GC5_ss9', 'GC5_ss11'], BW=75*9.81,
+                 saveFile='model'):
+    # all JRF, SO and ACT are stored in a dict whose keys are the folder names (trials)
+    JRF = {}
+    SO = {}
+    ACT = {}
     for fold in trials:
         # joint reaction forces in a dict whose keys are the filenames (scaling=BW)
-        reactions[fold] = totalReactionForces('Results\\'+fold, scaling=BW)
-    # store the reactions for each trial
-    with open('modelJRF.p', 'wb') as fp:
-        pickle.dump(reactions, fp, protocol=pickle.HIGHEST_PROTOCOL)
-    return reactions
+        JRF[fold], SO[fold], ACT[fold] = readResultFiles('Results\\'+fold, scaling=BW)
+    # store the JRF for each trial
+    with open(saveFile + 'JRF.p', 'wb') as fp:
+        pickle.dump(JRF, fp, protocol=pickle.HIGHEST_PROTOCOL)
+    # store the SO for each trial
+    with open(saveFile + 'SO.p', 'wb') as fp:
+        pickle.dump(SO, fp, protocol=pickle.HIGHEST_PROTOCOL)
+    # store the ACT for each trial
+    with open(saveFile + 'ACT.p', 'wb') as fp:
+        pickle.dump(ACT, fp, protocol=pickle.HIGHEST_PROTOCOL)
+    return JRF, SO, ACT
 
 
 # calculate the reaction forces from the joint reaction analysis
-# jrfileContent is the dictionary containing jr analysis results
+# JRF, SO, ACT are the dictionaries containing jr analysis, static optimisation
+# and activations
 # params:
 #   fold: contains the JRResults and SOResults subfolders
-#   scaling: the parameter to scale the calculated total reaction forces
-def totalReactionForces(fold, scaling=1):
+#   scaling: the parameter to scale the results or calculated variables
+def readResultFiles(fold, scaling=1):
     # jr results folder
     jrResultsFold = fold + '\\JRResults'
     # read the jr result files in the folder
     files = [os.path.join(jrResultsFold, file) for file in os.listdir(jrResultsFold)]
     # a dict to save all reaction forces from the files
-    reactionDict = dict()
+    JRF = dict()
+    SO = dict()
+    ACT = dict()
     for file in files:
         # filename without the path
         fileName = os.path.split(file)[1]
         # check whether the simulation is valid (reserve actuator moments 
-        # not exceeding 5% of the ID moments)
-        if checkSimulation(fold, fileName):
+        # not exceeding 10% of the ID moments)
+        check, soDict, soAct = checkSimulation(fold, fileName)
+        if check:
+            # normalize activations to gait cycle
+            for key, data in soAct.items():
+                soAct[key] = Normalize2GC(data)
+            # normalize so to gait cycle
+            for key, data in soDict.items():
+                data /= scaling
+                soDict[key] = Normalize2GC(data)
             # forces of a file
             jrDict = stoToNumpy(file)
             for key, data in jrDict.items():
@@ -139,12 +168,14 @@ def totalReactionForces(fold, scaling=1):
                     jrDict['lateral'] = np.where(flateral>0, flateral/scaling, 0)
                     jrDict['medial'] = np.where(fmedial>0, fmedial/scaling, 0)
             # save the reaction forces to the dict with the key being the filename
-            reactionDict[fileName] = jrDict
-        # if exceeding 5%
+            JRF[fileName] = jrDict
+            SO[fileName] = soDict
+            ACT[fileName] = soAct
+        # if exceeding 10%
         else:
             print('{} not a valid simulation'.format(file))
 
-    return reactionDict
+    return JRF, SO, ACT
 
 # normalizes the given data into 0-100 (gaitcycle)
 def Normalize2GC(data):
@@ -174,10 +205,14 @@ def checkSimulation(fold, jrFileName):
     soFileName = analysis + '_StaticOptimization_force.sto'
     # full path to the sofile
     soFile = fold + '\\SOResults\\' + soFileName
+    # add activations
+    soActFile = fold + '\\SOResults\\' + analysis + '_StaticOptimization_activation.sto'
+    # dict containing the activations
+    soAct = stoToNumpy(soActFile)
     # dict containing the so results
     soNumpy = stoToNumpy(soFile)
     # id results filename and dict containing the results
-    idFile = fold + '/id.sto'
+    idFile = fold + '\id.sto'
     idNumpy = stoToNumpy(idFile)
 
     # check hip, knee and ankle reserve actuators
@@ -195,21 +230,21 @@ def checkSimulation(fold, jrFileName):
                 maxID = max(np.abs(idMoment))
                 # percent difference
                 percent = 100*np.abs(soForce)/maxID
-            # if the percent difference exceeds 5%, report it
-            if max(percent) > 5:
-                printing = True
-                soNames.append(soKey)
-                idNames.append(idMomentName)
-                percents.append(max(percent))
+                # if the percent difference exceeds 10%, except hip_rot, report it
+                if max(percent) > 10 and 'hip_rotation' not in soKey:
+                    printing = True
+                    soNames.append(soKey)
+                    idNames.append(idMomentName)
+                    percents.append(max(percent))
     # if there is an invalid simulation
     if printing:
         print('{}, {} and {} % change in max iso:'.format(model, subj, reduction))
         for soname, idname, percent in zip(soNames, idNames, percents):
               print('Invalid simulation {}/{}={}'.format(soname, idname, percent))
         print('\n')
-        return False
+        return False, None, None
     else:
-        return True
+        return True, soNumpy, soAct
 
 
 # splits the joint reaction result filename to get the name of the model, 
