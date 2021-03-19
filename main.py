@@ -9,6 +9,7 @@ from analysis import runAnalysis
 from utils import loadModelJRF, saveModelJRF, loadExpJRF
 from plot import plotTrial
 from compareResults import compare
+from barchart import barChart
 
 # subject's body-weight
 BW = 75*9.81
@@ -33,26 +34,41 @@ createModels(modelFileName, groupNames, changeAmounts)
 # run all trials
 runAnalysis(modelFileName, trials)
 
-# save the valid models
-reactions = saveModelJRF(trials, BW)
-# read the valid model JRFs
-reactions = loadModelJRF()
+# save the valid model results
+JRF, SO, ACT = saveModelJRF(trials, BW)
+# read the valid model results
+JRF, SO, ACT = loadModelJRF()
 # read experimental JRFs at the knee
-expReactions = loadExpJRF(BW)
+expJRF = loadExpJRF(BW)
 
-# plot all trials
+# plot JRFs for trials
 for trial in trials:
-    plotTrial(reactions, expReactions, trial)
+    plotTrial(JRF, expJRF, trial)
 
 tWindow = [40, 60] # time window of % gait cycle for comparing models (second peak)
 forces = ['hip', 'knee', 'ankle'] # jrfs to be analyzed
 
-# compare to nominal model
-compare(reactions, None, trials, jointModelNames,
+# compare JRFs to nominal model
+compare(JRF, None, trials, jointModelNames,
         changeAmounts, forces, tWindow)
 
-# compare to experimental measurements
+# compare JRFs to experimental measurements
 forcesExp = ['knee'] # compare the magnitude of the knee JRF
-compare(reactions, expReactions,
+compare(JRF, expJRF,
         trials, jointModelNames,
         changeAmounts, forcesExp, tWindow)
+
+# muscle names for SO and ACT
+forces = ['iliacus_l', 'recfem_l', 'bfsh_l', 'gasmed_l', 'soleus_l']
+
+# compare SO forces to nominal model
+compare(SO, None, trials, jointModelNames,
+        changeAmounts, forces, tWindow=[40, 60])
+
+# plot SO forces for a trial
+plotTrial(SO, None, 'GC5_ss1', forces=forces, ylim=[-0.01, 2.1], compare='SO', save=False)
+# plot activations of forces for a trial
+plotTrial(ACT, None, 'GC5_ss1', forces=forces, ylim=[-0.02, 1.02], compare='ACT', save=False)
+# compare activations of forces, and plot a chart showing mean changes
+barChart(ACT, trials, jointModelNames,
+         changeAmounts, forces, tWindow=[40, 60], ylim=[-0.3, 0.75], save=False)
