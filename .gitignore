@@ -3,6 +3,8 @@ __pycache__
 /Results/*
 /2_models/*
 !2_models/Rajagopal2015-scaled.osim
+/Figures/*
+!/Figures/GC5_ss1.png
 
 # compiled bytecode
 *.pyc
