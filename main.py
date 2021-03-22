@@ -7,9 +7,9 @@ Created on Fri Mar  6 18:43:09 2021
 from createModels import createModels
 from analysis import runAnalysis
 from utils import loadModelJRF, saveModelJRF, loadExpJRF
-from plot import plotTrial
+from plot import plotTrial, meanPeakDeviationPlot
 from compareResults import compare
-from barchart import barChart
+
 
 # subject's body-weight
 BW = 75*9.81
@@ -30,21 +30,22 @@ changeAmounts = [-40, -30, -20, -10, 0, 10, 20, 30, 40]
 trials = ['GC5_ss1', 'GC5_ss3', 'GC5_ss8', 'GC5_ss9', 'GC5_ss11']
 
 # create models
-createModels(modelFileName, groupNames, changeAmounts)
+#createModels(modelFileName, groupNames, changeAmounts)
 # run all trials
-runAnalysis(modelFileName, trials)
+#runAnalysis(modelFileName, trials)
 
 # save the valid model results
-JRF, SO, ACT = saveModelJRF(trials, BW)
+#JRF, SO, ACT = saveModelJRF(trials, BW)
 # read the valid model results
 JRF, SO, ACT = loadModelJRF()
 # read experimental JRFs at the knee
 expJRF = loadExpJRF(BW)
 
 # plot JRFs for trials
-for trial in trials:
-    plotTrial(JRF, expJRF, trial)
-
+#for trial in trials:
+    #plotTrial(JRF, expJRF, trial)
+plotTrial(JRF, expJRF, trials[0])
+'''
 tWindow = [40, 60] # time window of % gait cycle for comparing models (second peak)
 forces = ['hip', 'knee', 'ankle'] # jrfs to be analyzed
 
@@ -66,9 +67,10 @@ compare(SO, None, trials, jointModelNames,
         changeAmounts, forces, tWindow=[40, 60])
 
 # plot SO forces for a trial
-plotTrial(SO, None, 'GC5_ss1', forces=forces, ylim=[-0.01, 2.1], compare='SO', save=False)
+plotTrial(SO, None, 'GC5_ss1', forces=forces, ylim=[-0.01, 2.1], compare='SO')
 # plot activations of forces for a trial
-plotTrial(ACT, None, 'GC5_ss1', forces=forces, ylim=[-0.02, 1.02], compare='ACT', save=False)
+plotTrial(ACT, None, 'GC5_ss1', forces=forces, ylim=[-0.02, 1.02], compare='ACT')
 # compare activations of forces, and plot a chart showing mean changes
-barChart(ACT, trials, jointModelNames,
-         changeAmounts, forces, tWindow=[40, 60], ylim=[-0.3, 0.75], save=False)
+meanPeakDeviationPlot(ACT, trials, jointModelNames,
+                      changeAmounts, forces, tWindow=[40, 60], ylim=[-0.3, 0.75])
+'''

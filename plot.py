@@ -40,7 +40,7 @@ def meanPeakDeviationPlot(reactions,
                           jointModelNames=['Hip', 'Knee', 'Ankle', 'Full'],
                           changeAmounts=[-40, -30, -20, -10, 0, 10, 20, 30, 40],
                           forces=['hip', 'knee', 'ankle'], tWindow=[40, 60],
-                          ylim=[0,6], save=False):
+                          ylim=[0,6], save=True):
     '''
     plots a chart, showing only mean changes from the nominal model results (stds can be
     added later)
@@ -124,7 +124,7 @@ def meanPeakDeviationPlot(reactions,
 
 def plotTrial(reactions, expReactions, trial='GC5_ss1',
               jointModelNames=JOINT_MODEL_NAMES, forces=FORCES,
-              ylim=[0,6], compare='JRF', save=False):
+              ylim=[0,6], compare='JRF', save=True):
     '''
     plots model and in-vivo JRFs for a trial
 

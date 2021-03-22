@@ -46,4 +46,4 @@ The following scripts are used to reproduce the results
   [L37](https://github.com/metinbicer/maxiso/blob/master/main.py#L37): `reactions = saveModelJRF(trials, BW)`
 
 # Example figure
-![](https://github.com/metinbicer/maxiso/blob/master/Figures/GC5_ss1.png)
+![](https://github.com/metinbicer/maxiso/blob/master/Figures/GC5_ss1_JRF.png)
