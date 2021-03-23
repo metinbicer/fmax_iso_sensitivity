@@ -30,22 +30,21 @@ changeAmounts = [-40, -30, -20, -10, 0, 10, 20, 30, 40]
 trials = ['GC5_ss1', 'GC5_ss3', 'GC5_ss8', 'GC5_ss9', 'GC5_ss11']
 
 # create models
-#createModels(modelFileName, groupNames, changeAmounts)
+createModels(modelFileName, groupNames, changeAmounts)
 # run all trials
-#runAnalysis(modelFileName, trials)
+runAnalysis(modelFileName, trials)
 
 # save the valid model results
-#JRF, SO, ACT = saveModelJRF(trials, BW)
+JRF, SO, ACT = saveModelJRF(trials, BW)
 # read the valid model results
 JRF, SO, ACT = loadModelJRF()
 # read experimental JRFs at the knee
 expJRF = loadExpJRF(BW)
 
 # plot JRFs for trials
-#for trial in trials:
-    #plotTrial(JRF, expJRF, trial)
-plotTrial(JRF, expJRF, trials[0])
-'''
+for trial in trials:
+    plotTrial(JRF, expJRF, trial)
+
 tWindow = [40, 60] # time window of % gait cycle for comparing models (second peak)
 forces = ['hip', 'knee', 'ankle'] # jrfs to be analyzed
 
@@ -73,4 +72,3 @@ plotTrial(ACT, None, 'GC5_ss1', forces=forces, ylim=[-0.02, 1.02], compare='ACT'
 # compare activations of forces, and plot a chart showing mean changes
 meanPeakDeviationPlot(ACT, trials, jointModelNames,
                       changeAmounts, forces, tWindow=[40, 60], ylim=[-0.3, 0.75])
-'''

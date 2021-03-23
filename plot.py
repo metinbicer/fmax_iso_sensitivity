@@ -106,7 +106,7 @@ def meanPeakDeviationPlot(reactions,
                 Flabel = MUSCLE_LABELS[force]
             except:
                 Flabel = force
-            ax.errorbar(x_pos, barValues_mean,
+            ax.plot(x_pos, barValues_mean, linewidth=0.2, marker='o',
                         color=colors[axRowID], label=Flabel)
             ax.axhline(y=0, color='black', ls='-', lw=0.5)
             ax.set_xticks(x_pos)
@@ -116,6 +116,9 @@ def meanPeakDeviationPlot(reactions,
     fig.text(0.5, 0.15, '% $F_{iso}$ Variation', ha='center', fontsize=15)
     # get the handles and labels
     handles, labels = ax.get_legend_handles_labels()
+    # copy the handles
+    handles = [copy.copy(ha) for ha in handles]
+    for h in handles: h.set_linestyle("")
     fig.legend(handles, labels, ncol=len(labels), loc='lower center',
                prop={'size': 15}, facecolor='white', edgecolor='white')
     if save: saveCurrrentFig(fig, figname='barChart', fold='Figures')
