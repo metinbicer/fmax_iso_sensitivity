@@ -71,4 +71,5 @@ plotTrial(SO, None, 'GC5_ss1', forces=forces, ylim=[-0.01, 2.1], compare='SO')
 plotTrial(ACT, None, 'GC5_ss1', forces=forces, ylim=[-0.02, 1.02], compare='ACT')
 # compare activations of forces, and plot a chart showing mean changes
 meanPeakDeviationPlot(ACT, trials, jointModelNames,
-                      changeAmounts, forces, tWindow=[40, 60], ylim=[-0.3, 0.75])
+                      changeAmounts, forces, tWindow=[40, 60], ylim=[-0.3, 0.75],
+                      compare='ACT')
