@@ -2,6 +2,7 @@
 To reproduce the results,
 1. download [OpenSim 3.3](https://simtk.org/projects/opensim)
 2. have Python installed, preferably [Anaconda](https://www.anaconda.com/)
+**Either use the steps in 3, 4 and 5 OR continue from 6
 3. create and activate a virtual environment using Python 2
     ```
     conda create --name osim3 python=2.7
@@ -18,9 +19,14 @@ To reproduce the results,
     cd OPENSIM_INSTALLATION_FOLDER\sdk\python
     python setup.py install
     ```
+6. Create a virtual environment using environment.yml
+	```
+	conda env create -f environment.yml
+	conda activate osim3
+    ```
 6. clone the repository using the following command on git,
     ```
-    git clone https://github.com/metinbicer/maxiso.git
+    git clone https://github.com/metinbicer/fmax_iso_sensitivity.git
     ```
 Note: To use different Python version, you may need to build the OpenSim API from scratch. Further information can be found from the [documentation](https://simtk-confluence.stanford.edu/display/OpenSim/Scripting+in+Python)
 # Scripts
@@ -41,9 +47,9 @@ The following scripts are used to reproduce the results
   4. plots joint reaction forces for each trial in a separate figure
   5. creates a table for the comparison between the modified and nominal model joint loadings
 * If you only want to analyse the previous analyses (saved to `modelJRF.p`), you need to comment out the following lines. Then, type `python main.py` in the command window.  
-  [L32](https://github.com/metinbicer/maxiso/blob/master/main.py#L32): `createModels(modelFileName, groupNames, changeAmounts)`  
-  [L34](https://github.com/metinbicer/maxiso/blob/master/main.py#L34): `runAnalysis(modelFileName, trials)`  
-  [L37](https://github.com/metinbicer/maxiso/blob/master/main.py#L37): `reactions = saveModelJRF(trials, BW)`
+  [L32](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L32): `createModels(modelFileName, groupNames, changeAmounts)`  
+  [L34](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L34): `runAnalysis(modelFileName, trials)`  
+  [L37](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L37): `reactions = saveModelJRF(trials, BW)`
 
 # Example figure
-![](https://github.com/metinbicer/maxiso/blob/master/Figures/GC5_ss1_JRF.png)
+![](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/Figures/GC5_ss1_JRF.png)
