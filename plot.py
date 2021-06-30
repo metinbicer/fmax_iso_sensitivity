@@ -142,22 +142,11 @@ def meanPeakDeviationPlot(reactions,
                         fmt='-o', color='gray', linewidth=0.5,
                         ecolor='black', elinewidth=2, markersize=1,
                         capsize=2, capthick=2)
-            bar_width = 0.1
-            opacity = 0.4
-            #ax.bar(x_pos, barValues_mean, bar_width,
-            #       yerr=barValues_std, align='center',
-            #       ecolor='black', alpha=opacity)
-            #ax.plot(x_pos, barValues_mean, ls='--', lw=0.5)
-            #ax.axhline(y=0, color='gray', ls='-', lw=0.2)
-            #ax.axhline(y=1, color='gray', ls='-', lw=0.2)
-
             ax.set_xticks(x_pos)
-
             labels = [str(c) for c in changeAmounts]
             ax.set_xticklabels(changeAmounts, rotation=45)
             ax.yaxis.grid(False)
             ax.xaxis.grid(False)
-            #ax.axis('equal')
             ax.set_ylim(ylim)
             gc = gcd(100*abs(ylim[0]), 100*abs(ylim[1]))
             yticks = np.arange(ylim[0], ylim[1]+0.01, 0.2)
@@ -169,7 +158,6 @@ def meanPeakDeviationPlot(reactions,
                 tick.label.set_fontsize(10)
             for tick in ax.yaxis.get_major_ticks():
                 tick.label.set_fontsize(10)
-    #fig.subplots_adjust(top=0.95, bottom=0.15, wspace=0.3, hspace=0.3)
     mng = plt.get_current_fig_manager()
     mng.window.showMaximized()
     plt.tight_layout()
@@ -359,7 +347,7 @@ def getPlotProps(change, n_lines):
         cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=1, vmax=n_lines),
                                      cmap=mpl.cm.Greys_r)
         lw = 2
-        ls = '-.'
+        ls = '-'
     elif r > 0:
         cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=1, vmax=n_lines),
                                      cmap=mpl.cm.Reds)

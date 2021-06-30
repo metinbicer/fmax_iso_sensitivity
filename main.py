@@ -42,18 +42,22 @@ JRF, SO, ACT = loadModelJRF()
 expJRF = loadExpJRF(BW)
 
 # plot JRFs for trials
-for trial in trials:
-    plotTrial(JRF, expJRF, trial)
+#for trial in trials:
+#    plotTrial(JRF, expJRF, trial)
 
 tWindow = [40, 60] # time window of % gait cycle for comparing models (second peak)
 forces = ['hip', 'knee', 'ankle'] # jrfs to be analyzed
 
 # compare JRFs to nominal model
+print(30*'-')
+print('Compare JRFs to nominal (Table 1)')
 compare(JRF, None, trials, jointModelNames,
         changeAmounts, forces, tWindow)
 
 # compare JRFs to experimental measurements
 forcesExp = ['knee'] # compare the magnitude of the knee JRF
+print(30*'-')
+print('Compare knee JRF to experimental measurements  (Table 1)')
 compare(JRF, expJRF,
         trials, jointModelNames,
         changeAmounts, forcesExp, tWindow)
@@ -62,7 +66,15 @@ compare(JRF, expJRF,
 forces = ['iliacus_l', 'recfem_l', 'bfsh_l', 'gasmed_l', 'soleus_l']
 
 # compare SO forces to nominal model
+print(30*'-')
+print('Compare SO forces of selected muscles to nominal')
 compare(SO, None, trials, jointModelNames,
+        changeAmounts, forces, tWindow=[40, 60])
+
+# compare activation to nominal model (Table 2)
+print(30*'-')
+print('Compare activations of selected muscles to nominal (Table 2)')
+compare(ACT, None, trials, jointModelNames,
         changeAmounts, forces, tWindow=[40, 60])
 
 # plot SO forces for a trial
@@ -71,5 +83,5 @@ plotTrial(SO, None, 'GC5_ss1', forces=forces, ylim=[-0.01, 2.1], compare='SO')
 plotTrial(ACT, None, 'GC5_ss1', forces=forces, ylim=[-0.02, 1.02], compare='ACT')
 # compare activations of forces, and plot a chart showing mean changes
 meanPeakDeviationPlot(ACT, trials, jointModelNames,
-                      changeAmounts, forces, tWindow=[40, 60], ylim=[-0.3, 0.75],
+                      changeAmounts, forces, tWindow=[40, 60], ylim=[-0, 1.05],
                       compare='ACT')
