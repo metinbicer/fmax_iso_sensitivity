@@ -2,7 +2,9 @@
 To reproduce the results,
 1. download [OpenSim 3.3](https://simtk.org/projects/opensim)
 2. have Python installed, preferably [Anaconda](https://www.anaconda.com/)
-**Either use the steps in 3, 4 and 5 OR continue from 6
+
+**Either use the steps in 3, 4 and 5 OR continue from 6**
+
 3. create and activate a virtual environment using Python 2
     ```
     conda create --name osim3 python=2.7
