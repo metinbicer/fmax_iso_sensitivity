@@ -73,12 +73,12 @@ def loadExpJRF(scaling=1):
     return expJRF
 
 
-# loads model JRFs from the saved file
+# loads model results from the saved file
 # params:
 #    saveFile : the name given to the files containing the JRF, SO and ACT
 # returns:
 #   dicts containing JRF, SO and ACT
-def loadModelJRF(loadFile='model'):
+def loadModelResults(loadFile='model'):
     try:
         with open(loadFile + 'JRF.p', 'rb') as fp:
             JRF = pickle.load(fp)
@@ -97,8 +97,8 @@ def loadModelJRF(loadFile='model'):
 #   trials   : list of string (results should be written using folders with the same name as trials)
 #   scaling  : the parameter to scale the calculated total reaction forces
 #   saveFile : the name given to the files containing the JRF, SO and ACT
-def saveModelJRF(trials=['GC5_ss1', 'GC5_ss3', 'GC5_ss8', 'GC5_ss9', 'GC5_ss11'], BW=75*9.81,
-                 saveFile='model'):
+def saveModelResults(trials=['GC5_ss1', 'GC5_ss3', 'GC5_ss8', 'GC5_ss9', 'GC5_ss11'], BW=75*9.81,
+                     saveFile='model'):
     # all JRF, SO and ACT are stored in a dict whose keys are the folder names (trials)
     JRF = {}
     SO = {}

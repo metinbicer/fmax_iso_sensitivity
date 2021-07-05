@@ -46,6 +46,4 @@ dependencies:
   - wheel=0.36.2=pyhd3eb1b0_0
   - wincertstore=0.2=py27hf04cefb_0
   - zlib=1.2.11=h3cc03e0_3
-  - pip:
-    - opensim==3.3
 prefix: C:\Users\metin\anaconda3\envs\osim3

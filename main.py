@@ -6,7 +6,7 @@ Created on Fri Mar  6 18:43:09 2021
 """
 from createModels import createModels
 from analysis import runAnalysis
-from utils import loadModelJRF, saveModelJRF, loadExpJRF
+from utils import loadModelResults, saveModelResults, loadExpJRF
 from plot import plotTrial, meanPeakDeviationPlot
 from compareResults import compare
 
@@ -37,7 +37,7 @@ runAnalysis(modelFileName, trials)
 # save the valid model results
 JRF, SO, ACT = saveModelJRF(trials, BW)
 # read the valid model results
-JRF, SO, ACT = loadModelJRF()
+JRF, SO, ACT = loadModelResults()
 # read experimental JRFs at the knee
 expJRF = loadExpJRF(BW)
 

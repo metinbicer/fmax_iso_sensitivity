@@ -155,7 +155,7 @@ def runAnalysis(modelFileName='Rajagopal2015-scaled.osim',
     os.remove('id.xml')
     os.remove('so.xml')
     os.remove('jr.xml')
-    os.remove('ExternalLoad.xml')
+    os.remove('ExternalLoads.xml')
 
 
 if __name__ == "__main__":
