@@ -42,8 +42,7 @@ JRF, SO, ACT = loadModelResults()
 expJRF = loadExpJRF(BW)
 
 # plot JRFs for trials
-#for trial in trials:
-#    plotTrial(JRF, expJRF, trial)
+plotTrial(JRF, expJRF, 'GC5_ss1')
 
 tWindow = [40, 60] # time window of % gait cycle for comparing models (second peak)
 forces = ['hip', 'knee', 'ankle'] # jrfs to be analyzed
@@ -78,7 +77,7 @@ compare(ACT, None, trials, jointModelNames,
         changeAmounts, forces, tWindow=[40, 60])
 
 # plot SO forces for a trial
-plotTrial(SO, None, 'GC5_ss1', forces=forces, ylim=[-0.01, 2.1], compare='SO')
+#plotTrial(SO, None, 'GC5_ss1', forces=forces, ylim=[-0.01, 2.1], compare='SO')
 # plot activations of forces for a trial
 plotTrial(ACT, None, 'GC5_ss1', forces=forces, ylim=[-0.02, 1.02], compare='ACT')
 # compare activations of forces, and plot a chart showing mean changes
