@@ -26,13 +26,26 @@ JOINT_MODEL_NAMES = ['Hip',   # only the Fiso of muscles crossing the hip joint 
 FORCES = ['hip', 'knee', 'ankle']
 
 # labels for muscles
-MUSCLE_LABELS = {'recfem_l': 'Rectus Femoris',
-                 'iliacus_l': 'Iliacus',
-                 'psoas_l': 'Psoas',
-                 'bfsh_l': 'Biceps Femoris Short Head',
-                 'gaslat_l': 'Gastrocnemius Lateralis',
-                 'gasmed_l': 'Gastrocnemius Medialis',
-                 'soleus_l': 'Soleus'}
+MUSCLE_LABELS = {'recfem_l': 'rectus femoris', 'iliacus_l': 'iliacus',
+                 'psoas_l': 'psoas', 'bfsh_l': 'biceps femoris\nshort head',
+                 'gaslat_l': 'gastrocnemius lateralis', 'gasmed_l': 'gastrocnemius medialis',
+                 'soleus_l': 'soleus', 'addlong_l': 'adductor longus',
+                 'addmagDist_l': 'adductor magnus (distal)', 'addmagMid_l': 'adductor magnus (middle)',
+                 'addmagIsch_l': 'adductor magnus (ischial)', 'addmagProx_l': 'adductor magnus (proximal)',
+                 'addbrev_l': 'adductor brevis', 'bflh_l': 'biceps femoris long head',
+                 'grac_l': 'gracilis', 'piri_l': 'piriformis',
+                 'glmin1_l': 'gluteus minimus (anterior)', 'glmin2_l': 'gluteus minimus (middle)',
+                 'glmin3_l': 'gluteus minimus (posterior)', 'glmed1_l': 'gluteus medius (anterior)',
+                 'glmed2_l': 'gluteus medius (middle)', 'glmed3_l': 'gluteus medius (posterior)',
+                 'tfl_l': 'tensor fascia latae', 'sart_l': 'sartorius',
+                 'glmax1_l': 'gluteus maximus (superior)', 'glmax2_l': 'gluteus maximus (middle)',
+                 'glmax3_l': 'gluteus maximus (inferior)', 'semimem_l': 'semimembranosus',
+                 'semiten_l': 'semitendinosus', 'vasint_l': 'vastus intermedius',
+                 'vasmed_l': 'vastus lateralis', 'vaslat_l': 'vastus medialis',
+                 'edl_l': 'extensor digitorum longus', 'ehl_l': 'extensor hallucis longus',
+                 'tibant_l': 'tibialis anterior', 'tibpost_l': 'tibialis posterior',
+                 'fdl_l': 'flexor digitorum longus', 'perlong_l': 'peroneus longus',
+                 'fhl_l': 'flexor hallucis longus', 'perbrev_l': 'peroneus brevis'}
 
 
 def meanPeakDeviationPlot(reactions,
@@ -40,7 +53,8 @@ def meanPeakDeviationPlot(reactions,
                           jointModelNames=['Hip', 'Knee', 'Ankle', 'Full'],
                           changeAmounts=[-40, -30, -20, -10, 0, 10, 20, 30, 40],
                           forces=['hip', 'knee', 'ankle'], tWindow=[40, 60],
-                          ylim=[-0.3,0.75], compare='ACT', save=True):
+                          ylim=[-0.3,0.75], compare='ACT', yticks=None, dy_ticks=0.2,
+                          save=True, save_name=''):
     '''
     plots a chart, showing mean and std changes from the nominal model results
 
@@ -92,7 +106,8 @@ def meanPeakDeviationPlot(reactions,
                 ylabel = MUSCLE_LABELS[ylabel]
             except:
                 pass
-            ylabel = ylabel.replace(' ', '\n')
+            if 'biceps' not in ylabel:
+                ylabel = ylabel.replace(' ', '\n')
         ylabels.append(' '.join([ylabel, unit]))
     # create the figure template
     # create figure and axes with the given number of rows and cols
@@ -102,6 +117,10 @@ def meanPeakDeviationPlot(reactions,
     elif ncols == 1 or nrows == 1:
         axs = axs.reshape(nrows, ncols)
     fig.patch.set_facecolor('white')
+    if yticks == None:
+        yticks = np.arange(ylim[0], ylim[1]+0.01, dy_ticks)
+    if 0 not in yticks:
+        yticks = np.append(yticks,0)
     # y labels
     for r in range(nrows):
         if any(force in ylabels[r] for force in FORCES):
@@ -142,6 +161,7 @@ def meanPeakDeviationPlot(reactions,
                         fmt='-o', color='gray', linewidth=0.5,
                         ecolor='black', elinewidth=2, markersize=1,
                         capsize=2, capthick=2)
+            #[i.set_linewidth(1) for i in ax.spines.itervalues()]
             ax.set_xticks(x_pos)
             labels = [str(c) for c in changeAmounts]
             ax.set_xticklabels(changeAmounts, rotation=45)
@@ -149,9 +169,6 @@ def meanPeakDeviationPlot(reactions,
             ax.xaxis.grid(False)
             ax.set_ylim(ylim)
             gc = gcd(100*abs(ylim[0]), 100*abs(ylim[1]))
-            yticks = np.arange(ylim[0], ylim[1]+0.01, 0.2)
-            if 0 not in yticks:
-                yticks = np.append(yticks,0)
             ax.set_yticks(yticks)
             ax.set_facecolor('white')
             for tick in ax.xaxis.get_major_ticks():
@@ -161,7 +178,7 @@ def meanPeakDeviationPlot(reactions,
     mng = plt.get_current_fig_manager()
     mng.window.showMaximized()
     plt.tight_layout()
-    if save: saveCurrrentFig(fig, figname=compare+'_ErrorBar_Values', fold='Figures')
+    if save: saveCurrrentFig(fig, figname=compare+'_Changes_'+save_name, fold='Figures', format='png')
     plt.show()
 
 
@@ -222,7 +239,8 @@ def plotTrial(reactions, expReactions, trial='GC5_ss1',
                 ylabel = MUSCLE_LABELS[ylabel]
             except:
                 pass
-            ylabel = ylabel.replace(' ', '\n')
+            if 'biceps' not in ylabel:
+                ylabel = ylabel.replace(' ', '\n')
         ylabels.append(' '.join([ylabel, unit]))
     # figure saving name
     if save:
@@ -235,7 +253,7 @@ def plotTrial(reactions, expReactions, trial='GC5_ss1',
 
 
 # save the figure with given figname and format in a fold
-def saveCurrrentFig(fig=None, fold='', figname='', format='svg'):
+def saveCurrrentFig(fig=None, fold='', figname='', format='png'):
     # create fold if not exist
     if not os.path.isdir(fold):
         os.mkdir(fold)
@@ -322,8 +340,12 @@ def generateFigure(trialReactions, trialExpReactions, trial, rows, cols, ylabels
             axCol[0].set_title(model)
             # for each row of this column (plot each joint force)
             for ax, row in zip(axCol, rows):
+                if change == 'Nominal':
+                    zorder = 20
+                else:
+                    zorder = 0
                 ax.plot(jrf[row], label=change, c=cmap.to_rgba(r),
-                        linewidth=lw, linestyle=ls)
+                        linewidth=lw, linestyle=ls, zorder=zorder)
                 if row in list(trialExpReactions.keys()):
                     ax.plot(trialExpReactions[row], linewidth=3, linestyle='-',
                             color='Green',label='Experimental')
@@ -344,18 +366,18 @@ def getPlotProps(change, n_lines):
     lw = 1
     ls = '-'
     if r == 0:
-        cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=1, vmax=n_lines),
+        cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=25),
                                      cmap=mpl.cm.Greys_r)
         lw = 2
         ls = '-'
     elif r > 0:
-        cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=1, vmax=n_lines),
+        cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=25),
                                      cmap=mpl.cm.Reds)
-        r = (abs(r)+30)/10
+        r = 3*(abs(r))/5
     else:
-        cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=1, vmax=n_lines),
+        cmap = mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=25),
                                      cmap=mpl.cm.Blues)
-        r = (abs(r)+30)/10
+        r = 3*(abs(r))/5
     # change is for the label
     if not change:
         # if there is no change, label='Nominal'

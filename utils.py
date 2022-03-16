@@ -78,13 +78,13 @@ def loadExpJRF(scaling=1):
 #    saveFile : the name given to the files containing the JRF, SO and ACT
 # returns:
 #   dicts containing JRF, SO and ACT
-def loadModelResults(loadFile='model'):
+def loadModelResults(loadFile=''):
     try:
-        with open(loadFile + 'JRF.p', 'rb') as fp:
+        with open(loadFile + 'JRF.pkl', 'rb') as fp:
             JRF = pickle.load(fp)
-        with open(loadFile + 'SO.p', 'rb') as fp:
+        with open(loadFile + 'SO.pkl', 'rb') as fp:
             SO = pickle.load(fp)
-        with open(loadFile + 'ACT.p', 'rb') as fp:
+        with open(loadFile + 'ACT.pkl', 'rb') as fp:
             ACT = pickle.load(fp)
             return JRF, SO, ACT
     except:
@@ -98,7 +98,7 @@ def loadModelResults(loadFile='model'):
 #   scaling  : the parameter to scale the calculated total reaction forces
 #   saveFile : the name given to the files containing the JRF, SO and ACT
 def saveModelResults(trials=['GC5_ss1', 'GC5_ss3', 'GC5_ss8', 'GC5_ss9', 'GC5_ss11'], BW=75*9.81,
-                     saveFile='model'):
+                     saveFile=''):
     # all JRF, SO and ACT are stored in a dict whose keys are the folder names (trials)
     JRF = {}
     SO = {}
@@ -107,13 +107,13 @@ def saveModelResults(trials=['GC5_ss1', 'GC5_ss3', 'GC5_ss8', 'GC5_ss9', 'GC5_ss
         # joint reaction forces in a dict whose keys are the filenames (scaling=BW)
         JRF[fold], SO[fold], ACT[fold] = readResultFiles('Results\\'+fold, scaling=BW)
     # store the JRF for each trial
-    with open(saveFile + 'JRF.p', 'wb') as fp:
+    with open(saveFile + 'JRF.pkl', 'wb') as fp:
         pickle.dump(JRF, fp, protocol=pickle.HIGHEST_PROTOCOL)
     # store the SO for each trial
-    with open(saveFile + 'SO.p', 'wb') as fp:
+    with open(saveFile + 'SO.pkl', 'wb') as fp:
         pickle.dump(SO, fp, protocol=pickle.HIGHEST_PROTOCOL)
     # store the ACT for each trial
-    with open(saveFile + 'ACT.p', 'wb') as fp:
+    with open(saveFile + 'ACT.pkl', 'wb') as fp:
         pickle.dump(ACT, fp, protocol=pickle.HIGHEST_PROTOCOL)
     return JRF, SO, ACT
 

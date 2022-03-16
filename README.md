@@ -45,7 +45,7 @@ The following scripts are used to reproduce the results
 * If you only want to analyse the previous analyses (saved to `modelJRF.p`), you need to comment out the following lines.  
   [L33](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L33): `createModels(modelFileName, groupNames, changeAmounts)`  
   [L35](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L35): `runAnalysis(modelFileName, trials)`  
-  [L38](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L37): `JRF, SO, ACT = saveModelJRF(trials, BW)`  
+  [L38](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L38): `JRF, SO, ACT = saveModelResults(trials, BW)`  
 Then, type `python main.py` in the command window.
 
 # Example figure

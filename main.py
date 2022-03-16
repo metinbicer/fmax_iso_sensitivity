@@ -35,7 +35,7 @@ createModels(modelFileName, groupNames, changeAmounts)
 runAnalysis(modelFileName, trials)
 
 # save the valid model results
-JRF, SO, ACT = saveModelJRF(trials, BW)
+JRF, SO, ACT = saveModelResults(trials, BW)
 # read the valid model results
 JRF, SO, ACT = loadModelResults()
 # read experimental JRFs at the knee
