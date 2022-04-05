@@ -1,9 +1,28 @@
+# Overview
+This repo contains the data, models and Python codes to reproduce the results of the following publication:
+```bibtex
+@article{Bicer2022fmaxiso,
+  title={Altering the Strength of the Muscles Crossing the Lower Limb Joints Only Affects Knee Joint Reaction Forces},
+  author={Metin Bicer, Andrew TM Phillips, Luca Modenese},
+  journal={Gait & Posture},
+  volume = {##},
+  pages = {###-###},
+  doi = {https://doi.org/10.1016/j.gaitpost.2021.06.014},
+  year={2022},
+  keywords = {Maximum isometric force, Musculoskeletal modelling, Joint reaction force, Total knee joint replacement, Walking}
+}
+```
+The paper is available open access at this [link](https://doi.org/10.1016/j.gaitpost.2022.03.020).
+# Brief summary of the publication
+
 # Requirements
 To reproduce the results,
 1. download [OpenSim 3.3](https://simtk.org/projects/opensim)
 2. have Python installed, preferably [Anaconda](https://www.anaconda.com/)
-3. create and activate a virtual environment with Python 2
-	**either**
+3. create and activate a virtual environment with Python 2  
+	
+	**either**  
+	
     ```
     conda create --name osim3 python=2.7
     conda activate osim3
@@ -24,7 +43,7 @@ To reproduce the results,
     git clone https://github.com/metinbicer/fmax_iso_sensitivity.git
     cd fmax_iso_sensitivity
     ```
-Note: To use different Python version, you may need to build the OpenSim API from scratch. Further information can be found from the [documentation](https://simtk-confluence.stanford.edu/display/OpenSim/Scripting+in+Python)
+Note: To use different Python version, you may need to build the OpenSim API from scratch. Further information can be found from the [documentation](https://simtk-confluence.stanford.edu/display/OpenSim/Scripting+in+Python).
 # Scripts
 The following scripts are used to reproduce the results
 | Script name | Script action | Related item in the manuscript|
@@ -33,16 +52,16 @@ The following scripts are used to reproduce the results
 | `createModels.py` | creates models with different joint strengths. `createModels()` is imported by `main.py`| N/A |
 | `analysis.py` | batch processes using inverse dynamics, static optimization and joint reaction analysis. `runAnalysis()` is imported by `main.py` | N/A |
 | `utils.py` | utility functions to process, save and load the results of all simulations.  `saveModelResults()`, `loadModelResults()` and `loadExpJRF()` are imported by `main.py` to save and load all simulation results and in-vivo joint loads | N/A |
-| `plot.py` | plots results (joint reactions, muscle forces etc.) obtained from simulations with models having different joint strength. In-vivo joint loads can be included. `plotTrial()` and `meanPeakDeviationPlot()` is imported by `main.py` | Figures |
-| `compareResults.py` | calculates metrics to compare simulation results from modified models to those obtained using the nominal model or all simulation results to in-vivo joint loads. `compare()` is imported by `main.py`| Tables |
+| `plot.py` | plots results (joint reactions, muscle activations and forces) obtained from simulations with models having different joint strength. In-vivo joint loads can be included. `plotTrial()` and `meanPeakDeviationPlot()` is imported by `main.py` | `plotTrial()` -> Figures 1&2, `meanPeakDeviationPlot()` -> Figure 3|
+| `compareResults.py` | calculates metrics to compare simulation results from modified models to those obtained using the nominal model or all simulation results to in-vivo joint loads. `compare()` is imported by `main.py`| Tables 1 and 2 |
 # Run
 * In the command prompt, type `python main.py`,
   1. runs inverse dynamics, static optimization and joint reaction analysis for all the data and models.
-  2. saves joint reaction forces, muscle forces and activations to `modelJRF.p`, `modelSO.p` and `modelACT.p` for all valid simulations
+  2. saves joint reaction forces, muscle forces and activations to `JRF.pkl`, `SO.pkl` and `ACT.pkl` for all valid simulations
   3. loads the files saved in step 2, and `eTibia_data.mat` that contains in-vivo knee reaction loads
   4. plots joint reaction forces for each trial in a separate figure, muscle forces and activations for a trial
   5. creates tables comparing simulation results to in-vio loadings, and modified model outputs to nominal results
-* If you only want to analyse the previous analyses (saved to `modelJRF.p`), you need to comment out the following lines.  
+* If you only want to analyse the previous analyses (saved to `JRF.pkl`), you need to comment out the following lines.  
   [L33](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L33): `createModels(modelFileName, groupNames, changeAmounts)`  
   [L35](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L35): `runAnalysis(modelFileName, trials)`  
   [L38](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L38): `JRF, SO, ACT = saveModelResults(trials, BW)`  
