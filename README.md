@@ -5,9 +5,9 @@ This repo contains the data, models and Python codes to reproduce the results of
   title={Altering the Strength of the Muscles Crossing the Lower Limb Joints Only Affects Knee Joint Reaction Forces},
   author={Metin Bicer, Andrew TM Phillips, Luca Modenese},
   journal={Gait & Posture},
-  volume = {##},
-  pages = {###-###},
-  doi = {https://doi.org/10.1016/j.gaitpost.2021.06.014},
+  volume = {95},
+  pages = {210-216},
+  doi = {https://doi.org/10.1016/j.gaitpost.2022.03.020},
   year={2022},
   keywords = {Maximum isometric force, Musculoskeletal modelling, Joint reaction force, Total knee joint replacement, Walking}
 }
