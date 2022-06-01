@@ -14,7 +14,14 @@ This repo contains the data, models and Python codes to reproduce the results of
 ```
 The paper is available open access at this [link](https://doi.org/10.1016/j.gaitpost.2022.03.020).
 # Brief summary of the publication
+In the manuscript:
++ We investigated effects of the strength alterations of the muscles crossing the hip, knee or ankle joints on the joint reaction forces.
++ In vivo measurements of the knee joint reaction forces ([5<th> Grand Challenge Competition to Predict In Vivo Knee Loads](https://simtk.org/projects/kneeloads)) were used to assess our simulation results and select the most accurate model.
++ We found that the most accurate model was the one with 40% weakness in knee-crossing muscles, which represented the weakness of the subject with total knee replacement.
++ Modifying the strength of muscles crossing each lower limb joint mostly alters the estimated joint reaction force at the knee joint, and not at the hip and ankle.
++ The knee joint reaction force decreases with reducing the strength of muscles crossing the knee or ankle joints, while it increases when reducing the strength of hip-crossing muscles.   
 
+	![](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/Figures/GC5_ss1_JRF.png)
 # Requirements
 To reproduce the results,
 1. download [OpenSim 3.3](https://simtk.org/projects/opensim)
@@ -66,6 +73,3 @@ The following scripts are used to reproduce the results
   [L35](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L35): `runAnalysis(modelFileName, trials)`  
   [L38](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/main.py#L38): `JRF, SO, ACT = saveModelResults(trials, BW)`  
 Then, type `python main.py` in the command window.
-
-# Example figure
-![](https://github.com/metinbicer/fmax_iso_sensitivity/blob/master/Figures/GC5_ss1_JRF.png)
